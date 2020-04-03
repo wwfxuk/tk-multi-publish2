@@ -39,3 +39,5 @@ nosetests.xml
 
 # Jetbrains
 .idea/
+# vscode
+.vscode
