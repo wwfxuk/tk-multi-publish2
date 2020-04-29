@@ -140,6 +140,11 @@ class BasicSceneCollector(HookBaseClass):
                     "icon": self._get_icon_path("file.png"),
                     "item_type": "file.image",
                 },
+                "LUT File": {
+                    "extensions": ["cube", "cc", "ccc", "lut", "cub"],
+                    "icon": self._get_icon_path("lut.png"),
+                    "item_type": "file.lut",
+                },
             }
 
         return self._common_file_info
