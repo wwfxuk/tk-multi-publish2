@@ -1,3 +1,8 @@
+# ---- ignore special files written during config setup
+/tk-metadata
+
+# Byte-compiled / optimized / DLL files
+￼__pycache__/
 *.py[cod]
 .DS_Store
 
@@ -36,5 +41,6 @@ nosetests.xml
 .project
 .pydevproject
 
-# Jetbrains
-.idea/
+# IDEs
+/.idea/
+/.vscode/
