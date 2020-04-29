@@ -183,7 +183,7 @@ class TreeNodeItem(TreeNodeBase):
         else:
             icon = self._expanded_icon
 
-        self._embedded_widget.expand_indicator.setIcon(icon)
+        self._embedded_widget.expand_indicator.setIcon(QtGui.QIcon(icon))
 
     def _check_expand_state(self):
         """
@@ -196,7 +196,7 @@ class TreeNodeItem(TreeNodeBase):
         else:
             icon = self._collapsed_icon
 
-        self._embedded_widget.expand_indicator.setIcon(icon)
+        self._embedded_widget.expand_indicator.setIcon(QtGui.QIcon(icon))
 
 
 class TopLevelTreeNodeItem(TreeNodeItem):
