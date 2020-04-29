@@ -517,7 +517,7 @@ class AppDialog(QtGui.QWidget):
         Callback when someone types in the
         publish comments box in the overview details pane
         """
-        comments = self.ui.item_comments.toPlainText()
+        comments = self.ui.item_comments.toPlainText().rstrip()
         # if this is the summary description...
         if self._current_item is None:
             if self._summary_comment != comments:
@@ -547,6 +547,21 @@ class AppDialog(QtGui.QWidget):
             # <multiple values> indicator to true
             if self._summary_comment != comments:
                 self._summary_comment_multiple_values = True
+
+            # Set whether the descrition is to be inherited.
+            # If the comment is empty, then it should inherit.
+            # Also if the comment is empty, set self.ui.item_comments
+            if comments:
+                self._current_item.inherit_description = False
+            else:
+                self._current_item.inherit_description = True
+                self.ui.item_comments.blockSignals(True)
+                self.ui.item_comments.setPlainText(self._current_item.description)
+                self.ui.item_comments.blockSignals(False)
+
+        font = self.ui.item_comments.font()
+        font.setItalic(self._current_item.inherit_description)
+        self.ui.item_comments.setFont(font)
 
     def _update_item_thumbnail(self, pixmap):
         """
@@ -604,7 +619,12 @@ class AppDialog(QtGui.QWidget):
             self.ui.item_thumbnail.hide()
 
         self.ui.item_description_label.setText("Description")
+        self.ui.item_comments.blockSignals(True)
         self.ui.item_comments.setPlainText(item.description)
+        self.ui.item_comments.blockSignals(False)
+        font = self.ui.item_comments.font()
+        font.setItalic(item.inherit_description)
+        self.ui.item_comments.setFont(font)
 
         # if summary thumbnail is defined, item thumbnail should inherit it
         # unless item thumbnail was set after summary thumbnail
@@ -649,6 +669,7 @@ class AppDialog(QtGui.QWidget):
 
         else:
             summary_text = "<p>The following items will be processed:</p>"
+            summary_text += "<style>ul { margin-left:-20px; }</style>"
             summary_text += "".join(["<p>%s</p>" % line for line in summary])
 
         self.ui.item_summary.setText(summary_text)
@@ -777,7 +798,7 @@ class AppDialog(QtGui.QWidget):
             self._progress_handler.logger.info("One item discovered by publisher.")
         elif num_errors == 0 and num_items_created > 1:
             self._progress_handler.logger.info(
-                "%d items discovered by publisher." % num_items_created
+                "%d items discovered by publisher.", num_items_created
             )
         elif num_errors > 0:
             self._progress_handler.logger.error("Errors reported. See log for details.")
@@ -827,7 +848,7 @@ class AppDialog(QtGui.QWidget):
                 self._progress_handler.logger.info("One item was added.")
             elif num_errors == 0 and num_items_created > 1:
                 self._progress_handler.logger.info(
-                    "%d items were added." % num_items_created
+                    "%d items were added.", num_items_created
                 )
             elif num_errors == 1:
                 self._progress_handler.logger.error(
@@ -835,7 +856,7 @@ class AppDialog(QtGui.QWidget):
                 )
             else:
                 self._progress_handler.logger.error(
-                    "%d errors reported. Please see the log for details." % num_errors
+                    "%d errors reported. Please see the log for details.", num_errors
                 )
 
             # rebuild the tree
@@ -1037,7 +1058,7 @@ class AppDialog(QtGui.QWidget):
                 self._progress_handler.logger.info("Processing aborted by user.")
             elif num_issues > 0:
                 self._progress_handler.logger.error(
-                    "Validation Complete. %d issues reported." % num_issues
+                    "Validation Complete. %d issues reported.", num_issues
                 )
             else:
                 self._progress_handler.logger.info(
@@ -1127,7 +1148,7 @@ class AppDialog(QtGui.QWidget):
                 )
             except Exception:
                 # ensure the full error shows up in the log file
-                logger.error("Publish error stack:\n%s" % (traceback.format_exc(),))
+                logger.error("Publish error stack:\n%s", traceback.format_exc())
                 # and log to ui
                 self._progress_handler.logger.error("Error while publishing. Aborting.")
                 publish_failed = True
@@ -1147,9 +1168,7 @@ class AppDialog(QtGui.QWidget):
                     )
                 except Exception:
                     # ensure the full error shows up in the log file
-                    logger.error(
-                        "Finalize error stack:\n%s" % (traceback.format_exc(),)
-                    )
+                    logger.error("Finalize error stack:\n%s", traceback.format_exc())
                     # and log to ui
                     self._progress_handler.logger.error(
                         "Error while finalizing. Aborting."
@@ -1465,10 +1484,10 @@ class AppDialog(QtGui.QWidget):
         """Opens the supplied url in the appropriate browser."""
 
         try:
-            logger.debug("Opening url: '%s'." % (url,))
+            logger.debug("Opening url: '%s'.", url)
             QtGui.QDesktopServices.openUrl(QtCore.QUrl(url))
         except Exception as e:
-            logger.error("Failed to open url: '%s'. Reason: %s" % (url, e))
+            logger.error("Failed to open url: '%s'. Reason: %s", url, e)
 
     def _trigger_stop_processing(self):
         """
