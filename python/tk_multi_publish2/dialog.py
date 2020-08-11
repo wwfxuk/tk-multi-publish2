@@ -518,6 +518,8 @@ class AppDialog(QtGui.QWidget):
         publish comments box in the overview details pane
         """
         comments = self.ui.item_comments.toPlainText().rstrip()
+        font = self.ui.item_comments.font()
+
         # if this is the summary description...
         if self._current_item is None:
             if self._summary_comment != comments:
@@ -558,9 +560,8 @@ class AppDialog(QtGui.QWidget):
                 self.ui.item_comments.blockSignals(True)
                 self.ui.item_comments.setPlainText(self._current_item.description)
                 self.ui.item_comments.blockSignals(False)
+            font.setItalic(self._current_item.inherit_description)
 
-        font = self.ui.item_comments.font()
-        font.setItalic(self._current_item.inherit_description)
         self.ui.item_comments.setFont(font)
 
     def _update_item_thumbnail(self, pixmap):
