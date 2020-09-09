@@ -380,10 +380,9 @@ class BasicFilePublishPlugin(HookBaseClass):
         # if the parent item has publish data, get it id to include it in the list of
         # dependencies
         publish_dependencies_ids = []
-        if "sg_publish_data" in item.parent.properties:
-            publish_dependencies_ids.append(
-                item.parent.properties.sg_publish_data["id"]
-            )
+        parent_publish_data = item.parent.get_property("sg_publish_data")
+        if parent_publish_data:
+            publish_dependencies_ids.append(parent_publish_data["id"])
 
         # handle copying of work to publish if templates are in play
         self._copy_work_to_publish(settings, item)
@@ -422,7 +421,8 @@ class BasicFilePublishPlugin(HookBaseClass):
 
         # create the publish and stash it in the item properties for other
         # plugins to use.
-        item.properties.sg_publish_data = sgtk.util.register_publish(**publish_data)
+        sg_publish_data = sgtk.util.register_publish(**publish_data)
+        item.local_properties["sg_publish_data"] = sg_publish_data
         self.logger.info("Publish registered!")
         self.logger.debug(
             "Shotgun Publish data...",
@@ -431,7 +431,7 @@ class BasicFilePublishPlugin(HookBaseClass):
                     "label": "Shotgun Publish Data",
                     "tooltip": "Show the complete Shotgun Publish Entity dictionary",
                     "text": "<pre>%s</pre>"
-                    % (pprint.pformat(item.properties.sg_publish_data),),
+                    % (pprint.pformat(sg_publish_data),),
                 }
             },
         )
@@ -451,7 +451,7 @@ class BasicFilePublishPlugin(HookBaseClass):
         publisher = self.parent
 
         # get the data for the publish that was just created in SG
-        publish_data = item.properties.sg_publish_data
+        publish_data = item.get_property("sg_publish_data")
 
         # ensure conflicting publishes have their status cleared
         publisher.util.clear_status_for_conflicting_publishes(
